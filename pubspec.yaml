@@ -12,7 +12,6 @@ dependencies:
     sdk: flutter
   sqflite: ^2.3.0
   path: ^1.8.3
-  provider: ^6.1.1
   shared_preferences: ^2.5.4
   url_launcher: ^6.3.2
   cupertino_icons: ^1.0.8
@@ -21,6 +20,8 @@ dependencies:
   intl: ^0.20.2 # Use 0.19.0 as it is the most stable for current SDKs
   pdf: ^3.11.3
   printing: ^5.14.2
+  google_generative_ai: ^0.4.0  # Add this line
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
