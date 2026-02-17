@@ -23,7 +23,7 @@ class AppState extends ChangeNotifier {
 
   // 1. Setup the Gemini Model with System Instructions
   final model = GenerativeModel(
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3-flash-preview',
     apiKey: "AIzaSyBUsAzkFxtgqK-IIy7trkSXOPaAg8diF8w",
     systemInstruction: Content.system(
       "You are Biashara Smart Assistant. Your goal is to help business owners grow. "

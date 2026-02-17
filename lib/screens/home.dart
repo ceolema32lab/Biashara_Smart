@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/app_state.dart';
@@ -161,7 +162,14 @@ class HomePage extends StatelessWidget {
 
   Widget _buildAIInsightBar(AppState appState, BuildContext context) {
     return FutureBuilder<String>(
-      future: appState.getAIResponse(appState.t("advice", "ushauri")),
+      // Note: Calling an API inside a build method can be expensive.
+      // Consider caching this result in AppState so it doesn't refresh every build.
+      future: appState.getAIResponse(
+        appState.t(
+          "Give me one short business tip",
+          "Nipe ushauri mmoja mfupi wa biashara",
+        ),
+      ),
       builder: (context, snapshot) {
         String tip = snapshot.hasData
             ? snapshot.data!
@@ -188,12 +196,30 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    tip,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: snapshot.hasData
+                      ? MarkdownBody(
+                          data: tip,
+                          // We style it to look like a single line for the bar
+                          styleSheet: MarkdownStyleSheet(
+                            p: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            strong: const TextStyle(
+                              color: Colors.amberAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          // maxLines: 1,
+                        )
+                      : Text(
+                          tip,
+                          style: const TextStyle(
+                            color: Colors.white38,
+                            fontSize: 12,
+                          ),
+                        ),
                 ),
                 const Icon(
                   Icons.arrow_forward_ios,
