@@ -11,14 +11,20 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Listen is true kuhakikisha UI inabadilika data ikibadilika
     final appState = Provider.of<AppState>(context);
-    final currencyFormat = NumberFormat.currency(symbol: 'TZS ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      symbol: 'TZS ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         title: Text(
           "${appState.t("Hello", "Habari")}, ${appState.userName}",
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -28,7 +34,9 @@ class HomePage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AIAssistantPage()),
+                MaterialPageRoute(
+                  builder: (context) => const AIAssistantPage(),
+                ),
               );
             },
             icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
@@ -116,7 +124,7 @@ class HomePage extends StatelessWidget {
             color: const Color(0xFF6366F1).withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 10),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -137,8 +145,14 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            appState.t("After COGS deduction", "Baada ya kutoa gharama ya mzigo"),
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 10),
+            appState.t(
+              "After COGS deduction",
+              "Baada ya kutoa gharama ya mzigo",
+            ),
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 10,
+            ),
           ),
         ],
       ),
@@ -146,40 +160,60 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildAIInsightBar(AppState appState, BuildContext context) {
-    String tip = appState.getAIResponse(appState.t("advice", "ushauri"));
+    return FutureBuilder<String>(
+      future: appState.getAIResponse(appState.t("advice", "ushauri")),
+      builder: (context, snapshot) {
+        String tip = snapshot.hasData
+            ? snapshot.data!
+            : appState.t("Thinking...", "Inafikiria...");
 
-    return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const AIAssistantPage()),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.amberAccent.withOpacity(0.1)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.tips_and_updates, color: Colors.amberAccent, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                tip,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+        return InkWell(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AIAssistantPage()),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.amberAccent.withOpacity(0.1)),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 12),
-          ],
-        ),
-      ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.tips_and_updates,
+                  color: Colors.amberAccent,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    tip,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white24,
+                  size: 12,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStatTile(String label, double value, Color color, NumberFormat format) {
+  Widget _buildStatTile(
+    String label,
+    double value,
+    Color color,
+    NumberFormat format,
+  ) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -190,15 +224,18 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 11)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white54, fontSize: 11),
+          ),
           const SizedBox(height: 5),
           Text(
             format.format(value),
             style: TextStyle(
-              color: color, 
-              fontSize: 13, 
+              color: color,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
-              overflow: TextOverflow.ellipsis
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -232,7 +269,9 @@ class HomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                isEmpty ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+                isEmpty
+                    ? Icons.warning_amber_rounded
+                    : Icons.check_circle_outline,
                 size: 16,
                 color: isEmpty ? Colors.redAccent : Colors.greenAccent,
               ),
@@ -241,7 +280,7 @@ class HomePage extends StatelessWidget {
                 isEmpty
                     ? appState.t("No stock added yet.", "Bado hujaweka bidhaa.")
                     : "${(pct * 100).toStringAsFixed(0)}% " +
-                        appState.t("Stock Level", "Kiwango cha Stoo"),
+                          appState.t("Stock Level", "Kiwango cha Stoo"),
                 style: TextStyle(
                   color: isEmpty ? Colors.redAccent : Colors.white70,
                   fontSize: 13,

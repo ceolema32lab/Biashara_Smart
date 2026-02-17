@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AppState extends ChangeNotifier {
   AppState() {
@@ -19,25 +21,47 @@ class AppState extends ChangeNotifier {
   List<Map<String, dynamic>> expenses = [];
   List<Map<String, dynamic>> vendors = [];
 
+  // 1. Setup the Gemini Model with System Instructions
+  final model = GenerativeModel(
+    model: 'gemini-2.5-flash',
+    apiKey: "AIzaSyBUsAzkFxtgqK-IIy7trkSXOPaAg8diF8w",
+    systemInstruction: Content.system(
+      "You are Biashara Smart Assistant. Your goal is to help business owners grow. "
+      "Rules: 1. Be concise. 2. Use bullet points for steps. "
+      "3. Always end with an 'Action Step' or an open-ended question like 'How do you currently handle...' to build rapport. "
+      "4. Use a mix of English and Swahili if requested.",
+    ),
+  );
+
   // --- Mfumo wa Kuhifadhi Data (Save/Load) ---
   Future<void> _saveToPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     prefs.setString('items', jsonEncode(items));
     prefs.setString('vendors', jsonEncode(vendors));
-    
-    // Geuza tarehe kuwa String ili zisave-ike kwenye JSON
-    prefs.setString('sales', jsonEncode(sales.map((s) {
-      var map = Map<String, dynamic>.from(s);
-      map['date'] = (map['date'] as DateTime).toIso8601String();
-      return map;
-    }).toList()));
 
-    prefs.setString('expenses', jsonEncode(expenses.map((e) {
-      var map = Map<String, dynamic>.from(e);
-      map['date'] = (map['date'] as DateTime).toIso8601String();
-      return map;
-    }).toList()));
+    // Geuza tarehe kuwa String ili zisave-ike kwenye JSON
+    prefs.setString(
+      'sales',
+      jsonEncode(
+        sales.map((s) {
+          var map = Map<String, dynamic>.from(s);
+          map['date'] = (map['date'] as DateTime).toIso8601String();
+          return map;
+        }).toList(),
+      ),
+    );
+
+    prefs.setString(
+      'expenses',
+      jsonEncode(
+        expenses.map((e) {
+          var map = Map<String, dynamic>.from(e);
+          map['date'] = (map['date'] as DateTime).toIso8601String();
+          return map;
+        }).toList(),
+      ),
+    );
 
     prefs.setString('userName', userName);
     prefs.setString('businessName', businessName);
@@ -54,7 +78,8 @@ class AppState extends ChangeNotifier {
 
     try {
       String? itemsJson = prefs.getString('items');
-      if (itemsJson != null) items = List<Map<String, dynamic>>.from(jsonDecode(itemsJson));
+      if (itemsJson != null)
+        items = List<Map<String, dynamic>>.from(jsonDecode(itemsJson));
 
       String? salesJson = prefs.getString('sales');
       if (salesJson != null) {
@@ -66,14 +91,17 @@ class AppState extends ChangeNotifier {
 
       String? expensesJson = prefs.getString('expenses');
       if (expensesJson != null) {
-        expenses = List<Map<String, dynamic>>.from(jsonDecode(expensesJson)).map((e) {
-          e['date'] = DateTime.parse(e['date']);
-          return e;
-        }).toList();
+        expenses = List<Map<String, dynamic>>.from(jsonDecode(expensesJson))
+            .map((e) {
+              e['date'] = DateTime.parse(e['date']);
+              return e;
+            })
+            .toList();
       }
 
       String? vendorsJson = prefs.getString('vendors');
-      if (vendorsJson != null) vendors = List<Map<String, dynamic>>.from(jsonDecode(vendorsJson));
+      if (vendorsJson != null)
+        vendors = List<Map<String, dynamic>>.from(jsonDecode(vendorsJson));
     } catch (e) {
       debugPrint("Error loading data: $e");
     }
@@ -159,22 +187,64 @@ class AppState extends ChangeNotifier {
       expenses[index] = {
         'amount': amount,
         'category': category,
-        'date': expenses[index]['date']
+        'date': expenses[index]['date'],
       };
       _saveToPrefs();
       notifyListeners();
     }
   }
 
-  // 10. getAIResponse (Inatumika Dashboard na AI Assistant)
-  String getAIResponse(String query) {
-    String q = query.toLowerCase();
-    if (q.contains("profit") || q.contains("faida")) {
-      return "Jumla ya faida ni TSh $totalProfit (Mauzo $totalSales - Matumizi $totalExpenses).";
-    } else if (q.contains("sales") || q.contains("mauzo")) {
-      return "Umefanya mauzo ya TSh $totalSales leo.";
+  // --- 10. Unified getAIResponse (Merged Online & Offline) ---
+  Future<String> getAIResponse(String prompt) async {
+    String q = prompt.toLowerCase();
+
+    // 1. FIRST: Check for Internet
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    bool isOffline = connectivityResult.contains(ConnectivityResult.none);
+
+    // 2. OFFLINE LOGIC: Use local data if offline OR for specific data queries
+    if (isOffline ||
+        q.contains("profit") ||
+        q.contains("faida") ||
+        q.contains("sales") ||
+        q.contains("mauzo")) {
+      if (q.contains("profit") || q.contains("faida")) {
+        return t(
+          "Total profit is TSh $totalProfit (Sales: $totalSales - Expenses: $totalExpenses).",
+          "Jumla ya faida ni TSh $totalProfit (Mauzo $totalSales - Matumizi $totalExpenses).",
+        );
+      } else if (q.contains("sales") || q.contains("mauzo")) {
+        return t(
+          "You have made sales worth TSh $totalSales today.",
+          "Umefanya mauzo ya TSh $totalSales leo.",
+        );
+      }
+
+      // If offline but not a specific data query
+      if (isOffline) {
+        return t(
+          "I'm currently offline. I can't reach the cloud, but you can still ask about your sales or profit!",
+          "Kwa sasa siko hewani. Siwezi kufikia mtandao, lakini unaweza kuuliza kuhusu mauzo au faida yako!",
+        );
+      }
     }
-    return "Nipo hapa kukusaidia kusimamia $businessName!";
+
+    // 3. ONLINE LOGIC: Call Gemini API for complex questions
+    try {
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
+      String rawResponse = response.text ?? "No response";
+
+      // CLIENT-SIDE WRAPPER: Make it "Compelling"
+      return """
+$rawResponse
+
+---
+**Growth Question for You:** *How do you currently handle this in your $businessName?*
+""";
+    } catch (e) {
+      return "Error: $e";
+    }
   }
 
   // --- ZINGINEZO ---
@@ -205,7 +275,11 @@ class AppState extends ChangeNotifier {
   }
 
   void addExpense(double amount, String category) {
-    expenses.insert(0, {'amount': amount, 'category': category, 'date': DateTime.now()});
+    expenses.insert(0, {
+      'amount': amount,
+      'category': category,
+      'date': DateTime.now(),
+    });
     _saveToPrefs();
     notifyListeners();
   }
@@ -218,11 +292,16 @@ class AppState extends ChangeNotifier {
 
   double get stockStatusPercentage {
     if (items.isEmpty) return 0.0;
-    double totalQty = items.fold(0, (sum, item) => sum + (item['quantity'] ?? 0));
+    double totalQty = items.fold(
+      0,
+      (sum, item) => sum + (item['quantity'] ?? 0),
+    );
     return (totalQty / 100).clamp(0.0, 1.0);
   }
 
-  double get totalSales => sales.fold(0.0, (sum, s) => sum + (s['total'] ?? 0.0));
-  double get totalExpenses => expenses.fold(0.0, (sum, e) => sum + (e['amount'] ?? 0.0));
+  double get totalSales =>
+      sales.fold(0.0, (sum, s) => sum + (s['total'] ?? 0.0));
+  double get totalExpenses =>
+      expenses.fold(0.0, (sum, e) => sum + (e['amount'] ?? 0.0));
   double get totalProfit => totalSales - totalExpenses;
 }

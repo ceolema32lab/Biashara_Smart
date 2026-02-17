@@ -11,14 +11,17 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
-    final currencyFormat = NumberFormat.currency(symbol: 'TSh ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      symbol: 'TSh ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
-      // MUHIMU: Tumeondoa "drawer: const AppDrawer()" hapa 
-      // ili kuzuia kutokea kwa Drawer mbili. 
-      // Sasa itatumia Drawer iliyopo kwenye MainNavigation.
 
+      // MUHIMU: Tumeondoa "drawer: const AppDrawer()" hapa
+      // ili kuzuia kutokea kwa Drawer mbili.
+      // Sasa itatumia Drawer iliyopo kwenye MainNavigation.
       appBar: AppBar(
         // Hii inahakikisha icon ya Drawer (Hamburger icon) inaonekana
         leading: IconButton(
@@ -34,12 +37,16 @@ class DashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${appState.t("Hello", "Habari")}, ${appState.userName}", 
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)
+              "${appState.t("Hello", "Habari")}, ${appState.userName}",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             Text(
-              appState.businessName, 
-              style: const TextStyle(fontSize: 12, color: Colors.white54)
+              appState.businessName,
+              style: const TextStyle(fontSize: 12, color: Colors.white54),
             ),
           ],
         ),
@@ -52,11 +59,13 @@ class DashboardPage extends StatelessWidget {
           IconButton(
             onPressed: () {
               Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (context) => const AIAssistantPage())
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AIAssistantPage(),
+                ),
               );
-            }, 
-            icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent)
+            },
+            icon: const Icon(Icons.auto_awesome, color: Colors.amberAccent),
           ),
           const SizedBox(width: 10),
         ],
@@ -79,8 +88,12 @@ class DashboardPage extends StatelessWidget {
 
               // 3. PERFORMANCE STATS
               Text(
-                appState.t("Performance", "Utendaji"), 
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
+                appState.t("Performance", "Utendaji"),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 15),
               GridView.count(
@@ -92,24 +105,28 @@ class DashboardPage extends StatelessWidget {
                 childAspectRatio: 1.4,
                 children: [
                   _buildSmallStatCard(
-                    appState.t("Total Sales", "Mauzo"), 
-                    currencyFormat.format(appState.totalSales), 
-                    Icons.trending_up, Colors.greenAccent
+                    appState.t("Total Sales", "Mauzo"),
+                    currencyFormat.format(appState.totalSales),
+                    Icons.trending_up,
+                    Colors.greenAccent,
                   ),
                   _buildSmallStatCard(
-                    appState.t("Expenses", "Matumizi"), 
-                    currencyFormat.format(appState.totalExpenses), 
-                    Icons.trending_down, Colors.redAccent
+                    appState.t("Expenses", "Matumizi"),
+                    currencyFormat.format(appState.totalExpenses),
+                    Icons.trending_down,
+                    Colors.redAccent,
                   ),
                   _buildSmallStatCard(
-                    appState.t("Stock Items", "Bidhaa"), 
-                    "${appState.items.length}", 
-                    Icons.inventory_2, Colors.blueAccent
+                    appState.t("Stock Items", "Bidhaa"),
+                    "${appState.items.length}",
+                    Icons.inventory_2,
+                    Colors.blueAccent,
                   ),
                   _buildSmallStatCard(
-                    appState.t("Vendors", "Wauzaji"), 
-                    "${appState.vendors.length}", 
-                    Icons.people_outline, Colors.orangeAccent
+                    appState.t("Vendors", "Wauzaji"),
+                    "${appState.vendors.length}",
+                    Icons.people_outline,
+                    Colors.orangeAccent,
                   ),
                 ],
               ),
@@ -117,8 +134,12 @@ class DashboardPage extends StatelessWidget {
 
               // 4. STOCK HEALTH
               Text(
-                appState.t("Inventory Health", "Hali ya Stoo"), 
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
+                appState.t("Inventory Health", "Hali ya Stoo"),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 15),
               _buildStockCard(appState),
@@ -138,9 +159,9 @@ class DashboardPage extends StatelessWidget {
       padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isLoss 
-            ? [const Color(0xFFEF4444), const Color(0xFF991B1B)] 
-            : [const Color(0xFF6366F1), const Color(0xFF4338CA)],
+          colors: isLoss
+              ? [const Color(0xFFEF4444), const Color(0xFF991B1B)]
+              : [const Color(0xFF6366F1), const Color(0xFF4338CA)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -150,14 +171,20 @@ class DashboardPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isLoss ? appState.t("Total Loss", "Hasara ya Jumla") : appState.t("Total Profit", "Faida ya Jumla"), 
-            style: const TextStyle(color: Colors.white70, fontSize: 14)
+            isLoss
+                ? appState.t("Total Loss", "Hasara ya Jumla")
+                : appState.t("Total Profit", "Faida ya Jumla"),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 8),
           FittedBox(
             child: Text(
               format.format(appState.totalProfit),
-              style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -166,32 +193,49 @@ class DashboardPage extends StatelessWidget {
   }
 
   Widget _buildAIQuickInsight(AppState appState) {
-    String insight = appState.getAIResponse("insight");
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.amberAccent.withOpacity(0.2)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.lightbulb_outline, color: Colors.amberAccent, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              insight,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+    return FutureBuilder<String>(
+      future: appState.getAIResponse("insight"),
+      builder: (context, snapshot) {
+        String insight = snapshot.hasData
+            ? snapshot.data!
+            : appState.t("Analyzing...", "Inachambua...");
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.amberAccent.withOpacity(0.2)),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.lightbulb_outline,
+                color: Colors.amberAccent,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  insight,
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSmallStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSmallStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -206,8 +250,18 @@ class DashboardPage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(color: Colors.white54, fontSize: 11)),
-              Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(color: Colors.white54, fontSize: 11),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ],
@@ -220,16 +274,25 @@ class DashboardPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B), 
-        borderRadius: BorderRadius.circular(18)
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(appState.t("Stock Level", "Kiwango cha Stoo"), style: const TextStyle(color: Colors.white70)),
-              Text("${(pct * 100).toStringAsFixed(0)}%", style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+              Text(
+                appState.t("Stock Level", "Kiwango cha Stoo"),
+                style: const TextStyle(color: Colors.white70),
+              ),
+              Text(
+                "${(pct * 100).toStringAsFixed(0)}%",
+                style: const TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 15),

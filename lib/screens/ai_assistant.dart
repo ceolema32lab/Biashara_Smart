@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_markdown/flutter_markdown.dart'; // New Import
 import '../providers/app_state.dart';
 
 class AIAssistantPage extends StatefulWidget {
@@ -16,43 +17,37 @@ class _AIAssistantPageState extends State<AIAssistantPage> {
   @override
   void initState() {
     super.initState();
-    // Karibisho la mwanzo kulingana na lugha iliyochaguliwa
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final appState = Provider.of<AppState>(context, listen: false);
       setState(() {
         _messages.add({
           "role": "ai",
           "content": appState.t(
-            "Habari! I am your Biashara Smart Assistant. Ask me about your sales, expenses, or business growth.",
-            "Habari! Mimi ni msaidizi wako wa Biashara Smart. Niulize kuhusu mauzo, matumizi, au ukuaji wa biashara yako."
-          )
+            "### Welcome to Biashara Smart! 🚀\nI am your growth assistant. Ask me about your **sales**, **expenses**, or **business strategy**.",
+            "### Karibu kwenye Biashara Smart! 🚀\nMimi ni msaidizi wako wa ukuaji. Niulize kuhusu **mauzo**, **matumizi**, au **mkakati wa biashara**.",
+          ),
         });
       });
     });
   }
 
-  void _handleSend(AppState appState) {
+  void _handleSend(AppState appState) async {
     if (_controller.text.trim().isEmpty) return;
 
     String userQuery = _controller.text;
-    
     setState(() {
       _messages.add({"role": "user", "content": userQuery});
     });
-
-    // Tunatumia "Brain" iliyopo kwenye AppState kupata majibu
-    String response = appState.getAIResponse(userQuery);
-
-    // Simulation ya AI "kufikiri" kidogo
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (mounted) {
-        setState(() {
-          _messages.add({"role": "ai", "content": response});
-        });
-      }
-    });
-
     _controller.clear();
+
+    // Show a small delay to mimic "thinking"
+    String response = await appState.getAIResponse(userQuery);
+
+    if (mounted) {
+      setState(() {
+        _messages.add({"role": "ai", "content": response});
+      });
+    }
   }
 
   @override
@@ -62,26 +57,23 @@ class _AIAssistantPageState extends State<AIAssistantPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
-        title: Text(appState.t("AI Business Assistant", "Msaidizi wa AI")),
+        title: Text(
+          appState.t("AI Business Consultant", "Mshauri wa Biashara"),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: Column(
         children: [
           Expanded(
-            child: _messages.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      bool isAI = _messages[index]['role'] == 'ai';
-                      return _buildChatBubble(
-                        _messages[index]['content']!,
-                        isAI,
-                      );
-                    },
-                  ),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                bool isAI = _messages[index]['role'] == 'ai';
+                return _buildChatBubble(_messages[index]['content']!, isAI);
+              },
+            ),
           ),
           _buildInputArea(appState),
         ],
@@ -94,29 +86,35 @@ class _AIAssistantPageState extends State<AIAssistantPage> {
       alignment: isAI ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
+          maxWidth: MediaQuery.of(context).size.width * 0.85,
         ),
         decoration: BoxDecoration(
           color: isAI ? const Color(0xFF1E293B) : const Color(0xFF6366F1),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(15),
-            topRight: const Radius.circular(15),
-            bottomLeft: Radius.circular(isAI ? 0 : 15),
-            bottomRight: Radius.circular(isAI ? 15 : 0),
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
+            bottomLeft: Radius.circular(isAI ? 0 : 20),
+            bottomRight: Radius.circular(isAI ? 20 : 0),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            )
-          ],
         ),
-        child: Text(
-          content,
-          style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
+        // USING MARKDOWN FOR PROFESSIONAL FORMATTING
+        child: MarkdownBody(
+          data: content,
+          styleSheet: MarkdownStyleSheet(
+            p: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+            strong: const TextStyle(
+              color: Color(0xFFFACC15),
+              fontWeight: FontWeight.bold,
+            ),
+            h3: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            listBullet: const TextStyle(color: Colors.white70),
+          ),
         ),
       ),
     );
@@ -127,12 +125,12 @@ class _AIAssistantPageState extends State<AIAssistantPage> {
       padding: EdgeInsets.only(
         left: 16,
         right: 8,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
         top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
       ),
       decoration: const BoxDecoration(
         color: Color(0xFF1E293B),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       child: Row(
         children: [
@@ -140,21 +138,20 @@ class _AIAssistantPageState extends State<AIAssistantPage> {
             child: TextField(
               controller: _controller,
               style: const TextStyle(color: Colors.white),
-              textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
-                hintText: appState.t("Ask me anything...", "Niulize chochote..."),
+                hintText: appState.t(
+                  "How can I help your business grow?",
+                  "Nisaidie vipi kukuza biashara yako?",
+                ),
                 hintStyle: const TextStyle(color: Colors.white38),
                 border: InputBorder.none,
               ),
               onSubmitted: (_) => _handleSend(appState),
             ),
           ),
-          CircleAvatar(
-            backgroundColor: const Color(0xFF6366F1),
-            child: IconButton(
-              icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-              onPressed: () => _handleSend(appState),
-            ),
+          IconButton(
+            icon: const Icon(Icons.send_rounded, color: Color(0xFF6366F1)),
+            onPressed: () => _handleSend(appState),
           ),
         ],
       ),
