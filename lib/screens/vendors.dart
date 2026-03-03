@@ -14,7 +14,7 @@ class VendorsPage extends StatelessWidget {
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         title: Text(
-          appState.t("Suppliers & Vendors", "Wauzaji & Masupulaya"),
+          appState.t("Suppliers & Vendors", "Wauzaji & Wasambazaji"),
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.transparent,

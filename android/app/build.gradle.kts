@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -11,29 +10,34 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Tumetumia VERSION_17 ili kuendana na mahitaji ya sasa ya Android
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        // Lazima jvmTarget ilandane na compileOptions hapo juu
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.biashara_smart"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        
+        // Gemini AI na Plugins nyingi za sasa zinahitaji angalau SDK 21
+        minSdk = flutter.minSdkVersion 
+        
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        getByName("release") {
+            // Ikiwekwa 'true' inasaidia kupunguza ukubwa wa APK (Obfuscation)
+            // Lakini kwa sasa tumeiacha 'false' ili kuzuia error za kwanza za build
+            isMinifyEnabled = false
+            isShrinkResources = false
+            
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -41,4 +45,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Hapa unaweza kuongeza dependencies nyingine za asili za android kama ikihitajika
 }

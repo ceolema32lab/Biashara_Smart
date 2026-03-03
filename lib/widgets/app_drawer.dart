@@ -10,99 +10,93 @@ class AppDrawer extends StatelessWidget {
     final appState = Provider.of<AppState>(context);
 
     return Drawer(
-      backgroundColor: const Color(0xFF1E293B),
       child: Column(
         children: [
-          // SEHEMU YA JUU (HEADER)
+          // Sehemu ya juu ya Drawer (Header)
           UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(color: Color(0xFF0F172A)),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6366F1), Color(0xFF4338CA)],
+              ),
+            ),
             accountName: Text(
-              appState.userName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              appState.businessName,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            accountEmail: Text(appState.businessName),
+            accountEmail: Text(appState.userName),
             currentAccountPicture: const CircleAvatar(
-              backgroundColor: Color(0xFF6366F1),
-              child: Icon(Icons.person, color: Colors.white, size: 40),
+              backgroundColor: Colors.white,
+              child: Icon(Icons.business, size: 40, color: Color(0xFF6366F1)),
             ),
           ),
 
-          // NAVIGATION LINKS
-          _buildDrawerItem(
-            icon: Icons.dashboard_outlined,
-            title: appState.t("Dashboard", "Dashibodi"),
-            onTap: () => Navigator.pushReplacementNamed(context, '/'),
+          // Mpangilio wa Menu
+          ListTile(
+            leading: const Icon(Icons.dark_mode),
+            title: Text(appState.t("Dark Mode", "Modi ya Giza")),
+            trailing: Switch(
+              value: appState.isDarkMode,
+              onChanged: (v) => appState.toggleTheme(),
+            ),
           ),
-          _buildDrawerItem(
-            icon: Icons.shopping_cart_outlined,
-            title: appState.t("Sales", "Mauzo"),
-            onTap: () => Navigator.pushNamed(context, '/sales'),
-          ),
-          _buildDrawerItem(
-            icon: Icons.inventory_2_outlined,
-            title: appState.t("Stock", "Stoki"),
-            onTap: () => Navigator.pushNamed(context, '/stock'),
-          ),
-          _buildDrawerItem(
-            icon: Icons.account_balance_wallet_outlined,
-            title: appState.t("Expenses", "Matumizi"),
-            onTap: () => Navigator.pushNamed(context, '/expenses'),
-          ),
-
-          const Divider(color: Colors.white10),
-
-          // SETTINGS (LANGUAGE & THEME)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  appState.t("Language", "Lugha"),
-                  style: const TextStyle(color: Colors.white70),
-                ),
-                DropdownButton<String>(
-                  value: appState.language,
-                  dropdownColor: const Color(0xFF1E293B),
-                  underline: const SizedBox(),
-                  items: const [
-                    DropdownMenuItem(value: 'en', child: Text("EN", style: TextStyle(color: Colors.white))),
-                    DropdownMenuItem(value: 'sw', child: Text("SW", style: TextStyle(color: Colors.white))),
-                  ],
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      appState.setLanguage(newValue);
-                    }
-                  },
-                ),
+          
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(appState.t("Language", "Lugha")),
+            trailing: DropdownButton<String>(
+              value: appState.languageCode,
+              underline: const SizedBox(),
+              onChanged: (v) => appState.setLanguage(v!),
+              items: const [
+                DropdownMenuItem(value: 'en', child: Text("🇺🇸 ENG")),
+                DropdownMenuItem(value: 'sw', child: Text("🇹🇿 SWA")),
               ],
             ),
           ),
 
+          const Divider(),
+
+          // --- SEHEMU YA "ABOUT US" ILIYOSAHIHISHWA ---
           ListTile(
-            leading: Icon(
-              appState.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-              color: Colors.white70,
-            ),
-            title: Text(
-              appState.t("Theme", "Muonekano"),
-              style: const TextStyle(color: Colors.white70),
-            ),
-            trailing: Switch(
-              value: appState.isDarkMode,
-              onChanged: (value) => appState.toggleTheme(),
-            ),
+            leading: const Icon(Icons.info_outline, color: Colors.indigo),
+            title: Text(appState.t("About Us", "Kuhusu Sisi")),
+            onTap: () {
+              showAboutDialog(
+                context: context,
+                applicationName: "Biashara Smart",
+                applicationVersion: "1.0.0",
+                applicationIcon: const Icon(Icons.auto_awesome, color: Colors.indigo, size: 40),
+                children: [
+                  const SizedBox(height: 15),
+                  Text(appState.t(
+                    "Biashara Smart is an AI-powered business management tool designed to help entrepreneurs track sales, expenses, and growth efficiently.",
+                    "Biashara Smart ni mfumo wa usimamizi wa biashara unaotumia akili mnemba (AI) kusaidia wajasiriamali kufuatilia mauzo, gharama, na ukuaji."
+                  )),
+                  const Divider(),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Developed By: Amana Lema",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    appState.t("Contact Us:", "Wasiliana nasi:"),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text("📞 +255 652 011 049"),
+                  const Text("📧 info@biasharasmart.com"),
+                  const SizedBox(height: 15),
+                  Text(
+                    appState.t("#Stay Blessed", "#Barikiwa Sana"),
+                    style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDrawerItem({required IconData icon, required String title, required VoidCallback onTap}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white70),
-      title: Text(title, style: const TextStyle(color: Colors.white)),
-      onTap: onTap,
     );
   }
 }
